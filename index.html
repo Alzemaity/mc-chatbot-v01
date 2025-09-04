@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mansoura College Chatbot</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat-container {
+      width: 400px;
+      height: 600px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-header {
+      background: linear-gradient(135deg, #3f51b5, #5a55ae);
+      color: #fff;
+      text-align: center;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .chat-box {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .message {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 80%;
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .user-message {
+      background: #e3f2fd;
+      align-self: flex-end;
+      text-align: right;
+    }
+    .bot-message {
+      background: #f1f1f1;
+      align-self: flex-start;
+    }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+    .chat-input input {
+      flex: 1;
+      border: none;
+      padding: 14px;
+      font-size: 14px;
+      outline: none;
+    }
+    .chat-input button {
+      background: #3f51b5;
+      border: none;
+      color: white;
+      padding: 14px 20px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .chat-input button:hover {
+      background: #2c3e94;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">💬 Mansoura College Bot</div>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="chat-input">
+      <input id="user-input" type="text" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const chatBox = document.getElementById("chat-box");
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      // عرض رسالة المستخدم
+      const userDiv = document.createElement("div");
+      userDiv.className = "message user-message";
+      userDiv.innerText = userMessage;
+      chatBox.appendChild(userDiv);
+
+      input.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // استدعاء API
+      try {
+        const res = await fetch("http://127.0.0.1:8000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: userMessage }),
+        });
+        const data = await res.json();
+
+        const botDiv = document.createElement("div");
+        botDiv.className = "message bot-message";
+        botDiv.innerText = data.answer;
+        chatBox.appendChild(botDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        const botDiv = document.createElement("div");
+        botDiv.className = "message bot-message";
+        botDiv.innerText = "⚠️ Error connecting to server.";
+        chatBox.appendChild(botDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+    input.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
